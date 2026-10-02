@@ -1,13 +1,13 @@
 // Runs the golden cases for Acta's Langflow flows against a live Langflow server and checks every output.
-// Usage: node langflow/eval/run.mjs [analyze|reply]   (default: both)
-// Reads LANGFLOW_URL, LANGFLOW_API_KEY, LANGFLOW_ANALYZE_FLOW_ID, LANGFLOW_REPLY_FLOW_ID from .env.
-// Optional EVAL_MODEL (e.g. openai/gpt-oss-20b) overrides the flows' model, to save the demo model's Groq quota.
+// Usage: node langflow/eval/run.mjs [analyze|reply|screen]   (default: all)
+// Reads LANGFLOW_URL, LANGFLOW_API_KEY, LANGFLOW_ANALYZE_FLOW_ID, LANGFLOW_REPLY_FLOW_ID, LANGFLOW_SCREEN_FLOW_ID from .env.
+// Optional EVAL_MODEL (e.g. openai/gpt-oss-20b) overrides the analyze and reply models, to save the demo model's Groq quota.
 import { readFileSync } from "node:fs";
 
 try { process.loadEnvFile(new URL("../../.env", import.meta.url)); } catch { /* fall back to the real environment */ }
-const { LANGFLOW_URL = "http://localhost:7860", LANGFLOW_API_KEY, LANGFLOW_ANALYZE_FLOW_ID, LANGFLOW_REPLY_FLOW_ID, EVAL_MODEL } = process.env;
-if (!LANGFLOW_API_KEY || !LANGFLOW_ANALYZE_FLOW_ID || !LANGFLOW_REPLY_FLOW_ID) {
-  console.error("Set LANGFLOW_API_KEY, LANGFLOW_ANALYZE_FLOW_ID and LANGFLOW_REPLY_FLOW_ID in .env");
+const { LANGFLOW_URL = "http://localhost:7860", LANGFLOW_API_KEY, LANGFLOW_ANALYZE_FLOW_ID, LANGFLOW_REPLY_FLOW_ID, LANGFLOW_SCREEN_FLOW_ID, EVAL_MODEL } = process.env;
+if (!LANGFLOW_API_KEY || !LANGFLOW_ANALYZE_FLOW_ID || !LANGFLOW_REPLY_FLOW_ID || !LANGFLOW_SCREEN_FLOW_ID) {
+  console.error("Set LANGFLOW_API_KEY, LANGFLOW_ANALYZE_FLOW_ID, LANGFLOW_REPLY_FLOW_ID and LANGFLOW_SCREEN_FLOW_ID in .env");
   process.exit(2);
 }
 // draft_reply takes the conversation through this Prompt Template field; the chat input is the latest message.
@@ -92,7 +92,8 @@ export function withCalendar(input) {
 }
 
 async function runFlow(flowId, inputValue, tweaks = {}, modelComponent) {
-  if (EVAL_MODEL) tweaks = { ...tweaks, [modelComponent]: { model_name: EVAL_MODEL } };
+  const override = EVAL_MODEL && modelComponent;
+  if (override) tweaks = { ...tweaks, [modelComponent]: { model_name: EVAL_MODEL } };
   const res = await fetch(`${LANGFLOW_URL}/api/v1/run/${flowId}`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-api-key": LANGFLOW_API_KEY },
@@ -101,7 +102,7 @@ async function runFlow(flowId, inputValue, tweaks = {}, modelComponent) {
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
   const message = (await res.json()).outputs[0].outputs[0].results.message;
   const usedModel = message.properties?.source?.source;
-  if (EVAL_MODEL && usedModel !== EVAL_MODEL) throw new Error(`EVAL_MODEL ignored: flow ran ${usedModel}`);
+  if (override && usedModel !== EVAL_MODEL) throw new Error(`EVAL_MODEL ignored: flow ran ${usedModel}`);
   return JSON.parse(message.text);
 }
 
@@ -145,6 +146,17 @@ const suites = {
     run: (c) => runFlow(LANGFLOW_REPLY_FLOW_ID, c.latest_message,
       { [REPLY_PROMPT_COMPONENT]: { conversation: JSON.stringify(c.conversation ?? { messages: [] }) } }, "LanguageModelComponent-LJv3n"),
     check: (out, c) => replyErrors(out, c.expect),
+  },
+  screen: {
+    file: "./screen_message.cases.json",
+    // Always the prompt-guard model: EVAL_MODEL does not apply here.
+    run: (c) => runFlow(LANGFLOW_SCREEN_FLOW_ID, c.message),
+    check: (score, c) => {
+      if (typeof score !== "number" || score < 0 || score > 1) return [`score ${JSON.stringify(score)} is not a probability`];
+      if (c.expect.max_score !== undefined && score > c.expect.max_score) return [`score ${score.toFixed(3)} above ${c.expect.max_score}`];
+      if (c.expect.min_score !== undefined && score < c.expect.min_score) return [`score ${score.toFixed(3)} below ${c.expect.min_score}`];
+      return [];
+    },
   },
 };
 
