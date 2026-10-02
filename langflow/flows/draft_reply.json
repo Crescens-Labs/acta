@@ -2,6 +2,9 @@
   "name": "draft_reply",
   "description": "Draft a knowledge-grounded reply for a human agent to review. Never sends anything.",
   "endpoint_name": "draft-reply",
+  "mcp_enabled": true,
+  "action_name": "draft_customer_reply",
+  "action_description": "Draft a reply to a customer's latest message using only the business's knowledge base (Aksara Academy test data). Input: the customer's latest message as plain text. Returns JSON {reply, sources, unanswered, needs_review}: sources are verbatim knowledge quotes, unanswered lists questions the knowledge does not cover. The draft is for a human agent to review; nothing is sent.",
   "data": {
     "nodes": [
       {
@@ -1220,7 +1223,7 @@
               "_frontend_node_folder_id": {
                 "value": "3d67afe7-9184-45a5-9774-48d4972837af"
               },
-              "is_refresh": false
+              "is_refresh": true
             },
             "description": "Ingest and search documents in Astra DB",
             "icon": "AstraDB",
@@ -1244,7 +1247,7 @@
                 ],
                 "selected": "JSON",
                 "name": "search_results",
-                "hidden": false,
+                "hidden": null,
                 "display_name": "Search Results",
                 "method": "search_documents",
                 "value": "__UNDEFINED__",
@@ -1262,7 +1265,7 @@
                 ],
                 "selected": "Table",
                 "name": "dataframe",
-                "hidden": false,
+                "hidden": null,
                 "display_name": "Table",
                 "method": "as_dataframe",
                 "value": "__UNDEFINED__",
@@ -1357,7 +1360,7 @@
             "namespaced_id": "ext:datastax:AstraDBVectorStoreComponent@official",
             "name": "AstraDB",
             "category": "datastax",
-            "last_updated": "2026-09-30T12:39:34.601Z"
+            "last_updated": "2026-09-30T13:05:21.332Z"
           },
           "showNode": true,
           "selected_output": "search_results"
@@ -1914,7 +1917,7 @@
                 ],
                 "selected": "Message",
                 "name": "text_output",
-                "hidden": false,
+                "hidden": null,
                 "display_name": "Model Response",
                 "method": "text_response",
                 "value": "__UNDEFINED__",
@@ -1932,7 +1935,7 @@
                 ],
                 "selected": "LanguageModel",
                 "name": "model_output",
-                "hidden": false,
+                "hidden": null,
                 "display_name": "Language Model",
                 "method": "build_model",
                 "value": "__UNDEFINED__",
@@ -1954,7 +1957,7 @@
                 "api_editable": false,
                 "display_name": "API Key",
                 "dynamic": false,
-                "info": "Overrides global provider settings. Leave blank to use your pre-configured API Key.",
+                "info": "Falls back to the OPENAI_COMPATIBLE_API_KEY environment variable (optional for local servers)",
                 "input_types": [],
                 "load_from_db": true,
                 "name": "api_key",
@@ -2350,11 +2353,11 @@
               "_frontend_node_folder_id": {
                 "value": "3d67afe7-9184-45a5-9774-48d4972837af"
               },
-              "is_refresh": false
+              "is_refresh": true
             },
             "tool_mode": false,
             "category": "models_and_agents",
-            "last_updated": "2026-09-30T12:39:34.622Z"
+            "last_updated": "2026-10-02T16:32:08.036Z"
           },
           "showNode": true,
           "selected_output": "text_output"
@@ -2971,8 +2974,8 @@
     ],
     "viewport": {
       "x": 20,
-      "y": 360.5952380952381,
-      "zoom": 0.5873015873015873
+      "y": 346.73809523809524,
+      "zoom": 0.6349206349206349
     }
   }
 }

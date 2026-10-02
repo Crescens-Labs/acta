@@ -2,6 +2,9 @@
   "name": "analyze_conversation",
   "description": "Analyze a customer conversation into structured JSON: summary, intent, evidence-backed signals, and a proposed next best action.",
   "endpoint_name": "analyze-conversation",
+  "mcp_enabled": true,
+  "action_name": "analyze_customer_conversation",
+  "action_description": "Analyze one customer conversation from WhatsApp or Instagram and return JSON with a summary, intent, urgency, sentiment, entities, evidence-backed buying or service signals, and ONE proposed next best action with its missing parameters. Input: a JSON string {\"now\": ISO timestamp, \"calendar\": optional list of {date, day} for the next 14 days, \"customer\": {}, \"messages\": [{\"id\", \"channel\", \"sender\": \"customer\"|\"agent\", \"sent_at\", \"text\"}]}. It only proposes; it never sends messages or executes actions.",
   "data": {
     "nodes": [
       {

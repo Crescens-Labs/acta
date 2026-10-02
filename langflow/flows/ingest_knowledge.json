@@ -2,6 +2,9 @@
   "name": "ingest_knowledge",
   "description": "Load a business knowledge document into Astra DB for draft_reply retrieval. Run only when the knowledge changes.",
   "endpoint_name": "ingest-knowledge",
+  "mcp_enabled": false,
+  "action_name": "ingest_knowledge",
+  "action_description": "Not exposed: writes to the knowledge base.",
   "data": {
     "nodes": [
       {
@@ -85,21 +88,40 @@
             "output_types": [],
             "outputs": [
               {
-                "allows_loop": false,
-                "cache": true,
-                "display_name": "Raw Content",
-                "group_outputs": false,
-                "method": "load_files_message",
-                "name": "message",
-                "selected": "Message",
-                "tool_mode": true,
                 "types": [
                   "Message"
                 ],
-                "value": "__UNDEFINED__",
+                "selected": "Message",
+                "name": "message",
                 "hidden": false,
+                "display_name": "Raw Content",
+                "method": "load_files_message",
+                "value": "__UNDEFINED__",
+                "cache": true,
+                "required_inputs": null,
+                "allows_loop": false,
+                "loop_types": null,
+                "group_outputs": false,
                 "options": null,
-                "required_inputs": null
+                "tool_mode": true
+              },
+              {
+                "types": [
+                  "Message"
+                ],
+                "selected": "Message",
+                "name": "path",
+                "hidden": null,
+                "display_name": "File Path",
+                "method": "load_files_path",
+                "value": "__UNDEFINED__",
+                "cache": true,
+                "required_inputs": null,
+                "allows_loop": false,
+                "loop_types": null,
+                "group_outputs": false,
+                "options": null,
+                "tool_mode": true
               }
             ],
             "pinned": false,
@@ -573,7 +595,7 @@
                 "track_in_telemetry": false,
                 "type": "file",
                 "value": [
-                  "3ab3302a-132e-4708-9530-57ebb79fc026/aksara-academy-knowledge-base (1).pdf"
+                  "aksara-academy-knowledge-base (1)"
                 ]
               },
               "pipeline": {
@@ -701,16 +723,16 @@
                 "name": "storage_location",
                 "options": [
                   {
-                    "icon": "hard-drive",
-                    "name": "Local"
+                    "name": "Local",
+                    "icon": "hard-drive"
                   },
                   {
-                    "icon": "Amazon",
-                    "name": "AWS"
+                    "name": "AWS",
+                    "icon": "Amazon"
                   },
                   {
-                    "icon": "google",
-                    "name": "Google Drive"
+                    "name": "Google Drive",
+                    "icon": "google"
                   }
                 ],
                 "override_skip": false,
@@ -751,12 +773,25 @@
                 "track_in_telemetry": true,
                 "type": "bool",
                 "value": true
-              }
+              },
+              "_frontend_node_flow_id": {
+                "value": "895e49f3-b107-4687-9583-2e7a40514119"
+              },
+              "_frontend_node_folder_id": {
+                "value": "3d67afe7-9184-45a5-9774-48d4972837af"
+              },
+              "is_refresh": false
             },
             "tool_mode": false,
-            "category": "files_and_knowledge"
+            "category": "files_and_knowledge",
+            "last_updated": "2026-10-02T16:31:35.820Z"
           },
-          "showNode": true
+          "showNode": true,
+          "selected_output": "message"
+        },
+        "measured": {
+          "width": 320,
+          "height": 279
         }
       },
       {
@@ -1030,6 +1065,10 @@
             "category": "processing"
           },
           "showNode": true
+        },
+        "measured": {
+          "width": 320,
+          "height": 415
         }
       },
       {
@@ -1546,7 +1585,7 @@
                   }
                 },
                 "override_skip": false,
-                "required": false,
+                "required": true,
                 "placeholder": "Setup Provider",
                 "show": true,
                 "name": "embedding_model",
@@ -1585,7 +1624,43 @@
                 "title_case": false,
                 "track_in_telemetry": false,
                 "type": "model",
-                "_input_type": "ModelInput"
+                "_input_type": "ModelInput",
+                "options": [
+                  {
+                    "name": "gemini-embedding-2",
+                    "icon": "GoogleGenerativeAI",
+                    "category": "Google Generative AI",
+                    "provider": "Google Generative AI",
+                    "metadata": {
+                      "embedding_class": "GoogleGenerativeAIEmbeddings",
+                      "param_mapping": {
+                        "model": "model",
+                        "api_key": "google_api_key",
+                        "dimensions": "output_dimensionality",
+                        "request_timeout": "request_options",
+                        "model_kwargs": "client_options"
+                      },
+                      "model_type": "embeddings"
+                    }
+                  },
+                  {
+                    "name": "models/gemini-embedding-001",
+                    "icon": "GoogleGenerativeAI",
+                    "category": "Google Generative AI",
+                    "provider": "Google Generative AI",
+                    "metadata": {
+                      "embedding_class": "GoogleGenerativeAIEmbeddings",
+                      "param_mapping": {
+                        "model": "model",
+                        "api_key": "google_api_key",
+                        "dimensions": "output_dimensionality",
+                        "request_timeout": "request_options",
+                        "model_kwargs": "client_options"
+                      },
+                      "model_type": "embeddings"
+                    }
+                  }
+                ]
               },
               "environment": {
                 "tool_mode": false,
@@ -1715,8 +1790,14 @@
               "reranker": {
                 "tool_mode": false,
                 "trace_as_metadata": true,
-                "options": [],
-                "options_metadata": [],
+                "options": [
+                  "nvidia/llama-3.2-nv-rerankqa-1b-v2"
+                ],
+                "options_metadata": [
+                  {
+                    "icon": "NVIDIA"
+                  }
+                ],
                 "combobox": false,
                 "dialog_inputs": {},
                 "toggle": true,
@@ -1725,7 +1806,7 @@
                 "placeholder": "",
                 "show": false,
                 "name": "reranker",
-                "value": "",
+                "value": "nvidia/llama-3.2-nv-rerankqa-1b-v2",
                 "display_name": "Reranker",
                 "advanced": false,
                 "api_editable": false,
@@ -1735,7 +1816,9 @@
                 "track_in_telemetry": true,
                 "external_options": {},
                 "type": "str",
-                "_input_type": "DropdownInput"
+                "_input_type": "DropdownInput",
+                "toggle_value": false,
+                "toggle_disable": true
               },
               "search_method": {
                 "tool_mode": false,
@@ -1809,7 +1892,7 @@
                 "placeholder": "",
                 "show": true,
                 "name": "search_score_threshold",
-                "value": 0.0,
+                "value": 0,
                 "display_name": "Search Score Threshold",
                 "advanced": true,
                 "api_editable": false,
@@ -1890,7 +1973,14 @@
                 "password": true,
                 "type": "str",
                 "_input_type": "SecretStrInput"
-              }
+              },
+              "_frontend_node_flow_id": {
+                "value": "895e49f3-b107-4687-9583-2e7a40514119"
+              },
+              "_frontend_node_folder_id": {
+                "value": "3d67afe7-9184-45a5-9774-48d4972837af"
+              },
+              "is_refresh": true
             },
             "description": "Ingest and search documents in Astra DB",
             "icon": "AstraDB",
@@ -1914,16 +2004,17 @@
                 ],
                 "selected": "JSON",
                 "name": "search_results",
+                "hidden": null,
                 "display_name": "Search Results",
                 "method": "search_documents",
                 "value": "__UNDEFINED__",
                 "cache": true,
+                "required_inputs": null,
                 "allows_loop": false,
+                "loop_types": null,
                 "group_outputs": false,
-                "tool_mode": true,
-                "hidden": false,
                 "options": null,
-                "required_inputs": null
+                "tool_mode": true
               },
               {
                 "types": [
@@ -1931,16 +2022,17 @@
                 ],
                 "selected": "Table",
                 "name": "dataframe",
+                "hidden": null,
                 "display_name": "Table",
                 "method": "as_dataframe",
                 "value": "__UNDEFINED__",
                 "cache": true,
+                "required_inputs": null,
                 "allows_loop": false,
+                "loop_types": null,
                 "group_outputs": false,
-                "tool_mode": true,
-                "hidden": false,
                 "options": null,
-                "required_inputs": null
+                "tool_mode": true
               },
               {
                 "types": [
@@ -1953,11 +2045,12 @@
                 "method": "as_vector_store",
                 "value": "__UNDEFINED__",
                 "cache": true,
+                "required_inputs": null,
                 "allows_loop": false,
+                "loop_types": null,
                 "group_outputs": false,
-                "tool_mode": true,
                 "options": null,
-                "required_inputs": null
+                "tool_mode": true
               }
             ],
             "field_order": [
@@ -2023,9 +2116,15 @@
             "extension_version": "0.1.8",
             "namespaced_id": "ext:datastax:AstraDBVectorStoreComponent@official",
             "name": "AstraDB",
-            "category": "datastax"
+            "category": "datastax",
+            "last_updated": "2026-09-30T13:06:14.514Z"
           },
-          "showNode": true
+          "showNode": true,
+          "selected_output": "search_results"
+        },
+        "measured": {
+          "width": 320,
+          "height": 579
         }
       },
       {
@@ -2123,9 +2222,9 @@
       }
     ],
     "viewport": {
-      "x": 0,
-      "y": 0,
-      "zoom": 1
+      "x": 291.32777232580963,
+      "y": 339.9921491658489,
+      "zoom": 0.7684003925417076
     }
   }
 }
